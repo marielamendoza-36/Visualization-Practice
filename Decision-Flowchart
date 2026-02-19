@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eye Tracker Decision Flowchart</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2ee;
+    --card: #ffffff;
+    --accent: #2d6a4f;
+    --accent2: #e76f51;
+    --accent3: #457b9d;
+    --warn: #e9c46a;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e0dbd3;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.9rem;
+    text-align: center;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  .flowchart {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* NODE STYLES */
+  .node {
+    width: 100%;
+    max-width: 560px;
+    border-radius: 14px;
+    padding: 18px 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .node:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+
+  .node-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.6;
+  }
+
+  .node-text {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .node-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* NODE TYPES */
+  .node-start { background: var(--text); color: white; text-align: center; }
+  .node-start .node-label { color: rgba(255,255,255,0.6); }
+  .node-start .node-sub { color: rgba(255,255,255,0.55); }
+
+  .node-decision { background: var(--warn); border: 2px solid #d4a017; }
+  .node-decision .node-label { color: #7a5c00; }
+
+  .node-assess { background: var(--card); border: 1.5px solid var(--border); }
+
+  .node-action-keep { background: #eaf4f0; border: 1.5px solid #a8d5c2; }
+  .node-action-keep .node-label { color: var(--accent); }
+
+  .node-action-remove { background: #fef0ec; border: 1.5px solid #f4b49e; }
+  .node-action-remove .node-label { color: var(--accent2); }
+
+  .node-comm { background: #eaf1f8; border: 1.5px solid #a8c8e8; }
+  .node-comm .node-label { color: var(--accent3); }
+
+  .node-end { background: var(--card); border: 2px solid var(--accent); text-align: center; }
+  .node-end .node-label { color: var(--accent); }
+
+  /* CONNECTOR */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 4px 0;
+    gap: 0;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 28px;
+    background: #c4bdb5;
+  }
+
+  .connector-arrow {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 9px solid #c4bdb5;
+  }
+
+  .connector-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 3px;
+  }
+
+  /* BRANCH */
+  .branch-wrapper {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .branch-container {
+    display: flex;
+    width: 100%;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .branch {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 340px;
+  }
+
+  .branch-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .branch-keep .branch-header { background: #a8d5c2; color: #1a4a35; }
+  .branch-remove .branch-header { background: #f4b49e; color: #7a2a10; }
+
+  /* PROS/CONS */
+  .pros-cons {
+    width: 100%;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    margin-top: 8px;
+    font-size: 0.82rem;
+  }
+
+  .pros-cons-title {
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    color: var(--muted);
+  }
+
+  .pro-item, .con-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .pro-item::before { content: "✓"; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+  .con-item::before { content: "✗"; color: var(--accent2); font-weight: 700; flex-shrink: 0; }
+
+  /* MERGE CONNECTOR */
+  .merge-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 0;
+    margin: 8px 0 0 0;
+  }
+
+  .merge-line-left, .merge-line-right {
+    height: 2px;
+    flex: 1;
+    background: #c4bdb5;
+    max-width: 180px;
+  }
+
+  .merge-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .merge-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #c4bdb5;
+  }
+
+  /* TOGGLE */
+  .expandable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .expandable .toggle-hint {
+    font-size: 0.72rem;
+    color: var(--accent3);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .expandable-content {
+    display: none;
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  .expandable-content.open { display: block; }
+
+  .expand-icon {
+    display: inline-block;
+    transition: transform 0.2s;
+    margin-left: 4px;
+  }
+
+  .expanded .expand-icon { transform: rotate(90deg); }
+</style>
+</head>
+<body>
+
+<h1>My Eye Tracker Session — Decision Guide</h1>
+<p class="subtitle">Infant Head-Mounted Eye Tracker · Data Collection Scenario</p>
+
+<div class="flowchart">
+
+  <!-- START -->
+  <div class="node node-start">
+    <div class="node-label">Situation</div>
+    <div class="node-text">The eye tracker is not recording properly during my infant session</div>
+    <div class="node-sub">The infant is fussy and upset. I need to make a decision.</div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- ASSESS -->
+  <div class="node node-assess">
+    <div class="node-label">Step 1 · Assess the Situation</div>
+    <div class="node-text">I evaluate the infant's distress level and data quality in real time</div>
+    <div class="node-sub">How fussy is the infant? Am I capturing any usable data? How far into the session am I?</div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- DECISION -->
+  <div class="node node-decision">
+    <div class="node-label">Step 2 · Key Decision</div>
+    <div class="node-text">Should I leave the device on or remove it?</div>
+  </div>
+
+  <!-- BRANCH -->
+  <div class="branch-wrapper">
+    <div class="branch-container">
+
+      <!-- KEEP ON -->
+      <div class="branch branch-keep">
+        <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+        <div class="branch-header">Option A · Leave it on</div>
+        <div class="node node-action-keep">
+          <div class="node-label">Tradeoff</div>
+          <div class="node-text">Higher likelihood of capturing some data, even if quality is reduced</div>
+        </div>
+        <div class="pros-cons">
+          <div class="pros-cons-title">Pros</div>
+          <div class="pro-item">Greater chance of obtaining data</div>
+          <div class="pro-item">Avoids disrupting the session</div>
+          <div class="pros-cons-title" style="margin-top:8px">Cons</div>
+          <div class="con-item">Data quality is likely poor</div>
+          <div class="con-item">Infant remains uncomfortable</div>
+        </div>
+      </div>
+
+      <!-- REMOVE -->
+      <div class="branch branch-remove">
+        <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+        <div class="branch-header">Option B · Remove it</div>
+        <div class="node node-action-remove">
+          <div class="node-label">Tradeoff</div>
+          <div class="node-text">Opportunity to recalibrate for better results and comfort the infant</div>
+        </div>
+        <div class="pros-cons">
+          <div class="pros-cons-title">Pros</div>
+          <div class="pro-item">I can recalibrate for better data</div>
+          <div class="pro-item">May reduce infant's fussiness</div>
+          <div class="pros-cons-title" style="margin-top:8px">Cons</div>
+          <div class="con-item">Infant may refuse to wear it again</div>
+          <div class="con-item">Could upset the infant further</div>
+          <div class="con-item">May appear unprofessional to caregivers</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MERGE -->
+    <div class="merge-line">
+      <div class="merge-line-left"></div>
+      <div class="merge-down"><div class="merge-dot"></div></div>
+      <div class="merge-line-right"></div>
+    </div>
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+  </div>
+
+  <!-- COMMUNICATE WITH CAREGIVER -->
+  <div class="node node-comm">
+    <div class="node-label">Step 3 · Communicate with Caregiver</div>
+    <div class="node-text">I am transparent with the infant's caregiver</div>
+    <div class="node-sub">I clearly explain that the device is not operating properly and that another session may be needed. I keep my tone calm and reassuring.</div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- COMMUNICATE WITH TEAM -->
+  <div class="node node-comm expandable" onclick="toggleExpand(this)">
+    <div class="node-label">Step 4 · Communicate with My Team <span class="expand-icon">▶</span></div>
+    <div class="node-text">I loop in my lab assistant, PI, or relevant team members</div>
+    <div class="toggle-hint">Click to see how ▶</div>
+    <div class="expandable-content">
+      <div class="node-sub">
+        <strong>In the moment:</strong> I use Slack, Teams, or whichever channel makes sense to briefly flag what happened and the decision I made.<br><br>
+        <strong>Back in the lab:</strong> I walk through my thought process in person, explain the tradeoffs I weighed, and ask for feedback. This shows initiative and professional self-reflection.
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- END -->
+  <div class="node node-end">
+    <div class="node-label">Outcome</div>
+    <div class="node-text">I document the session, note the data quality issue, and schedule a follow-up if needed</div>
+    <div class="node-sub">I reflect on the decision and use team feedback to inform my future sessions.</div>
+  </div>
+
+</div>
+
+<script>
+  function toggleExpand(el) {
+    el.classList.toggle('expanded');
+    const content = el.querySelector('.expandable-content');
+    content.classList.toggle('open');
+    const hint = el.querySelector('.toggle-hint');
+    if (content.classList.contains('open')) {
+      hint.textContent = 'Click to collapse ▲';
+    } else {
+      hint.textContent = 'Click to see how ▶';
+    }
+  }
+</script>
+
+</body>
+</html>
